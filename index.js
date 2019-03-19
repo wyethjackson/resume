@@ -12,16 +12,20 @@ const app = express();
 const layout = require("./layout");
 const index = require("./index.marko");
 const path = require('path');
-const enforce = require('express-sslify');
 const PORT = process.env.PORT;
-
-if(process.env.NODE_ENV !== 'development') {
-  app.use(enforce.HTTPS());
-}
-
 app.use(express.static('public'));
 app.use(require('lasso/middleware').serveStatic());
-app.get('/', function (req, res) {
+async function ensureSecure(req, res, next) {
+    if (req.get('X-Forwarded-Proto')=='https' || req.hostname == 'localhost') {
+        next();
+        return;
+    } else if(req.get('X-Forwarded-Proto')!='https'){
+        res.redirect('https://' + req.hostname + req.url);
+        return;
+    }
+}
+app.all('/*', ensureSecure);
+app.get('/', async function (req, res) {
   res.setHeader("content-type", "text/html");
   res.marko(index, {});
 })
