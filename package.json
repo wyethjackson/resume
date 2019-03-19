@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@lasso/marko-taglib": "^1.0.15",
+    "browser-refresh": "^1.7.3",
+    "browser-refresh-taglib": "^1.1.0",
+    "express": "^4.16.4",
+    "lasso": "^3.2.9",
+    "lasso-marko": "^2.4.7",
+    "marko": "^4.16.1"
+  },
+  "scripts": {
+    "start": "browser-refresh index.js"
+  }
+}
