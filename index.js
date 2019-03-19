@@ -12,7 +12,13 @@ const app = express();
 const layout = require("./layout");
 const index = require("./index.marko");
 const path = require('path');
+const enforce = require('express-sslify');
 const PORT = process.env.PORT;
+
+if(process.env.NODE_ENV !== 'development') {
+  app.use(enforce.HTTPS());
+}
+
 app.use(express.static('public'));
 app.use(require('lasso/middleware').serveStatic());
 app.get('/', function (req, res) {

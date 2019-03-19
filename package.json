@@ -5,6 +5,7 @@
     "browser-refresh-taglib": "^1.1.0",
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
+    "express-sslify": "^1.2.0",
     "lasso": "^3.2.9",
     "lasso-marko": "^2.4.7",
     "marko": "^4.16.1"
