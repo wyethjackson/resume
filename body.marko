@@ -2,21 +2,32 @@ import Profile from "./components/profile.marko";
 import Projects from "./components/projects.marko";
 import Blog from "./components/blog.marko";
 import Contact from "./components/contact.marko";
+import Users from "./components/users.marko";
+
 class {
-    onCreate() {
+    onInput(input) {
+      input = input.body_data;
       this.state = {
-        nav_index: 0,
-        nav_elements: ['Profile', 'Projects', 'Blog', 'Contact'],
+        active_index: input.active_index || 0,
+        pages: [
+          {page: Profile, name: 'Profile'},
+          {page: Projects, name: 'Projects'},
+          {page: Blog, name: 'Blog'},
+          {page: Contact, name: 'Contact'},
+          {page: Users, name: `${input.user ? `${input.user.name}` : 'Sign In'}`, active_index: input.users_active_index || 0},
+        ],
         active_classes: ['active'],
         nav_title: 'Wyeth Jackson',
+        user: input.user,
+        posts: input.posts,
+        alarms: input.alarms,
+        path: input.path,
       }
     }
 
-
     navigate(index, event) {
-      this.state.nav_index = Number(index);
+      this.state.active_index = Number(index);
     }
-
 }
 <nav class="navbar navbar-expand-lg navbar-light sticky-top bg-light border border-secondary border-top-0 border-left-0 border-right-0">
   <a class="navbar-brand" href="/">${state.nav_title}</a>
@@ -25,24 +36,23 @@ class {
   </button>
   <div class="collapse navbar-collapse" id="my-nav">
     <ul class="navbar-nav mr-auto">
-      <li class=`nav-item ${state.nav_index === 0 ? state.active_classes.join("") : ''}`>
-        <a class="nav-link" href="#" on-click('navigate', '0')>${state.nav_elements[0]}</a>
-      </li>
-      <li class=`nav-item ${state.nav_index === 1 ? state.active_classes.join("") : ''}`>
-        <a class="nav-link" href="#" index=1 on-click('navigate', '1')>${state.nav_elements[1]}</a>
-      </li>
-      <li class=`nav-item ${state.nav_index === 2 ? state.active_classes.join("") : ''}`>
-        <a class="nav-link" href="#" on-click('navigate', '2')>${state.nav_elements[2]}</a>
-      </li>
-      <li class=`nav-item ${state.nav_index === 3 ? state.active_classes.join("") : ''}`>
-        <a class="nav-link" href="#" on-click('navigate', '3')>${state.nav_elements[3]}</a>
-      </li>
+      <for(index, item in state.pages)>
+        <li class=`nav-item ${state.active_index === index ? state.active_classes.join("") : ''}`>
+          <a class="nav-link" href="#" on-click('navigate', String(index))>${(state.pages[index]).name}</a>
+        </li>
+      </for>
     </ul>
   </div>
 </nav>
 <div class="container py-4">
-  <${Profile} name="Wyeth Jackson" if(state.nav_index === 0)/>
-  <${Projects} if(state.nav_index === 1)/>
-  <${Blog} if(state.nav_index === 2)/>
-  <${Contact} if(state.nav_index === 3)/>
+  <div class="notification-container">
+    <for(alarm in state.alarms)>
+      <div class=`alert alert-${alarm.type} my-2` role="alert">
+        ${alarm.message}
+      </div>
+    </for>
+  </div>
+  <if(state.pages[state.active_index])>
+    <${(state.pages[state.active_index]).page} path=(state.path) sub_active_index=((state.pages[state.active_index]).active_index) posts=(state.posts) user=(state.user)/>
+  </if>
 </div>

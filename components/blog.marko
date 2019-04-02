@@ -1,7 +1,41 @@
-<div class="card border border-secondary">
+class {
+  onInput(input) {
+    this.state = {
+      user: input.user,
+      posts: input.posts || [],
+    }
+  }
+}
+<for(post in state.posts)>
+  <div class="card my-2">
+    <div class="card-body">
+      <h5 class="card-title">${post.title}</h5>
+      <p class="card-text">${post.content}</p>
+    </div>
+  </div>
+</for>
+<div class="card">
   <div class="card-body">
     <h5 class="card-title">My New Blog!</h5>
-    <p class="card-text">Welcome! There is no content yet, so enjoy this gif that perfectly describes my life.</p>
+    <p class="card-text">Welcome! Enjoy this gif that perfectly describes my life.</p>
     <iframe src="https://giphy.com/embed/xTiTnLWl6ftNuZAe8E" width="480" height="272" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
   </div>
 </div>
+<if(state.user && state.user.admin)>
+  <div class="card my-2">
+    <div class="card-body">
+      <h5>Write a blog post:</h5>
+      <form action="/users/post" method="POST">
+        <div class="form-group">
+          <label for="title-input">Title:</label>
+          <input class="form-control" type="text" name="title" id="title-input" />
+        </div>
+        <div class="form-group">
+          <label for="content-input">Content:</label>
+          <textarea class="form-control" name="content" id="content-input" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+</if>

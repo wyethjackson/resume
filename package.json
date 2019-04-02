@@ -1,14 +1,21 @@
 {
   "dependencies": {
     "@lasso/marko-taglib": "^1.0.15",
+    "bcrypt": "^3.0.5",
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.18.3",
     "browser-refresh": "^1.7.3",
     "browser-refresh-taglib": "^1.1.0",
+    "cookie-parser": "^1.4.4",
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
+    "express-session": "^1.15.6",
     "express-sslify": "^1.2.0",
     "lasso": "^3.2.9",
     "lasso-marko": "^2.4.7",
-    "marko": "^4.16.1"
+    "lodash": "^4.17.11",
+    "marko": "^4.16.1",
+    "pg": "^7.9.0"
   },
   "scripts": {
     "start": "browser-refresh index.js"

@@ -1,0 +1,33 @@
+import SignIn from './sign_in.marko';
+import SignUp from './sign_up.marko';
+import Account from './account.marko';
+class {
+  onInput(input) {
+    this.state = {
+      active_index: input.sub_active_index || 0,
+      active_classes: ['active'],
+      pages: [{name: 'Sign In', page: SignIn}, {name: 'Sign Up', page: SignUp}],
+      user: input.user,
+    }
+  }
+  navigate(index, _event) {
+    this.state.active_index = Number(index);
+  }
+}
+<div class="card border border-secondary">
+  <div class="card-body">
+    <if(state.user && state.user.user_uuid)>
+      <${Account} user=(state.user) />
+    </if>
+    <else>
+      <ul class="nav nav-pills justify-content-center">
+        <for(index, item in state.pages)>
+          <li class="nav-item">
+            <a class=`nav-link ${index === state.active_index ? state.active_classes.join("") : ''}` href="#" on-click('navigate', String(index))>${(state.pages[index]).name}</a>
+          </li>
+        </for>
+      </ul>
+      <${(state.pages[state.active_index]).page}/>
+    </else>
+  </div>
+</div>
