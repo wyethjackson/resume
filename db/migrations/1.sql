@@ -1,7 +1,3 @@
-CREATE TABLE IF NOT EXISTS migrations (
-  migration_id INT PRIMARY KEY
-);
-
 CREATE TABLE IF NOT EXISTS users (
   user_id SERIAL PRIMARY KEY,
   user_uuid TEXT UNIQUE NOT NULL,
