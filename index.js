@@ -35,12 +35,6 @@ const cookieParser = require('cookie-parser');
     console.log('error: ', err);
     return;
   }
-
-  app.use('/users', users);
-  app.use('/blog', blog);
-  app.use('/contact', contact);
-  app.use('/profile', profile);
-  app.use('/projects', projects);
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
   app.use('/', express.static('public'));
@@ -68,7 +62,11 @@ const cookieParser = require('cookie-parser');
   }
 
   app.all('/*', ensureSecure, getAlarms);
-
+  app.use('/users', users);
+  app.use('/blog', blog);
+  app.use('/contact', contact);
+  app.use('/profile', profile);
+  app.use('/projects', projects);
   app.get('/', async function (req, res) {
     let query = [get('posts', ['post_id', 'title', 'content', 'user_id'])];
     let user;
