@@ -1,7 +1,5 @@
 var request = require('request');
 require('dotenv').config()
-const accountSid = process.env.TWILIO_UUID;
-const authToken = process.env.TWILIO_TOKEN;
 var api = require('clicksend');
 
 var smsApi = new api.SMSApi(process.env.CLICK_SEND_USERNAME, process.env.CLICK_SEND_KEY);
