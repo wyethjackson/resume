@@ -1,21 +1,30 @@
 {
   "dependencies": {
     "@lasso/marko-taglib": "^1.0.15",
+    "@types/node": "^13.5.0",
     "bcrypt": "^3.0.5",
     "bcrypt-nodejs": "0.0.3",
+    "bluebird": "^3.7.2",
     "body-parser": "^1.18.3",
     "browser-refresh": "^1.7.3",
     "browser-refresh-taglib": "^1.1.0",
+    "clicksend": "^5.0.37",
     "cookie-parser": "^1.4.4",
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
+    "express-graphql": "^0.8.0",
     "express-session": "^1.15.6",
     "express-sslify": "^1.2.0",
+    "graphql": "^14.2.1",
+    "http": "0.0.0",
     "lasso": "^3.2.9",
     "lasso-marko": "^2.4.7",
     "lodash": "^4.17.11",
     "marko": "^4.16.1",
-    "pg": "^7.9.0"
+    "pg": "^7.9.0",
+    "request": "^2.88.0",
+    "twilio": "^3.39.3",
+    "typescript": "^3.7.5"
   },
   "scripts": {
     "start": "browser-refresh index.js"
