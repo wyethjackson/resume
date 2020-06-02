@@ -233,6 +233,7 @@ async function get_code_name_game(code_name_id) {
     let code_name_winner_sql = `SELECT winner FROM code_names WHERE code_name_id = '${code_name_id}'`;
     let code_name_winner_query = client.query(code_name_winner_sql);
     const [code_name_words_result, code_name_turn_result, code_name_teams_result, code_name_winner_result] = await Promise.all([code_name_query, code_name_turn_query, code_name_teams_query, code_name_winner_query]);
+    console.log("SQLLL>>> ", code_name_turn_sql);
     return {
       words: code_name_words_result.rows,
       turn: code_name_turn_result.rows[0].team_name,

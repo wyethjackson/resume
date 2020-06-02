@@ -3,6 +3,7 @@ import CodeNamesEvents from "./code_names_events";
 class {
   onInput(input) {
     if(!!input.code_names) {
+      console.log("CODE ANMES IIDDDD>> ", input.code_names.code_name_id);
       this.codeNames = new CodeNamesEvents(input.code_names.code_name_id);
     }
     const code_names = !!input.code_names ? input.code_names : {};

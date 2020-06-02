@@ -80,6 +80,7 @@ router.get('/code_names', async function (req, res) {
 });
 
 router.get('/code_names/:code_name_id', async function (req, res) {
+  console.log("CODE ANME IDDD>>> ", req.params.code_name_id);
   let code_name_data = {};
   if(!!req.params.code_name_id) {
     code_name_data = await getGameDetails(req.params.code_name_id);
