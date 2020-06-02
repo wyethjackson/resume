@@ -76,13 +76,18 @@ router.get('/', async function (req, res) {
 });
 
 router.get('/code_names', async function (req, res) {
-  res.marko(index, {path: '../', page_id: 'PROJECTS', active_index: 1});
+  res.marko(index, {path: '../', page_id: 'PROJECTS', active_index: 1, hide_nav: true});
 });
 
 router.get('/code_names/:code_name_id', async function (req, res) {
-  const code_name_data = await getGameDetails(req.params.code_name_id);
+  let code_name_data = {};
+  if(!!req.params.code_name_id) {
+    code_name_data = await getGameDetails(req.params.code_name_id);
+  }
   res.marko(index, {path: '../', page_id: 'PROJECTS', active_index: 1, code_names: code_name_data, hide_nav: true});
 });
+
+
 
 router.get('/code_names/:code_name_id/ajax', async function (req, res) {
   const code_name_data = await getGameDetails(req.params.code_name_id);
@@ -90,7 +95,6 @@ router.get('/code_names/:code_name_id/ajax', async function (req, res) {
 });
 
 router.post('/code_names/:code_name_id/ajax', async function (req, res) {
-  // const code_name_data = await getGameDetails(req.params.code_name_id);
   const status = await update_game(req.body, req.params.code_name_id);
   if(status.error) {
     res.sendStatus(500);
