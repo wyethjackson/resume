@@ -1,0 +1,333 @@
+import CodeNamesEvents from "./code_names_events";
+
+class {
+  onInput(input) {
+    if(!!input.code_names) {
+      this.codeNames = new CodeNamesEvents(input.code_names.code_name_id);
+    }
+    const code_names = !!input.code_names ? input.code_names : {};
+
+    this.state = {
+      rows: code_names.rows || [],
+      game_url: '#',
+      turn: code_names.turn,
+      words: code_names.words,
+      team1: code_names.team1,
+      team2: code_names.team2,
+      code_name_id: code_names.code_name_id,
+      guesses: code_names.max_guesses || 0,
+      max_guesses: code_names.guesses || null,
+      clue: code_names.clue || null,
+      guess_text: code_names.guess_text || null,
+      game_over: (!code_names.code_name_id || !!code_names.winner),
+      show_spy_master_info: (!!code_names.clue && !!code_names.guess_text),
+      winner: code_names.winner || null,
+      clue_state: null,
+      spy_master: false,
+      game_code_given: '',
+      active_toggle: 'field_operative',
+    }
+    setInterval(this.refreshData.bind(this), 5000);
+  }
+
+  setActiveToggle(toggle) {
+    this.state.active_toggle = toggle;
+  }
+
+  async refreshData() {
+    if(!!this.codeNames) {
+      const code_names = (await this.codeNames.fetch()) || {};
+      if(!!code_names) {
+        this.state.rows = code_names.rows || [];
+        this.state.words = code_names.words || [];
+        this.state.turn = code_names.turn || '';
+        this.state.team1 = code_names.team1;
+        this.state.team2 = code_names.team2;
+        this.state.guesses = code_names.guesses;
+        this.state.max_guesses = code_names.max_guesses;
+        this.state.clue = code_names.clue;
+        this.state.guess_text = code_names.guess_text;
+        this.state.game_over = code_names.game_over;
+        this.state.show_spy_master_info = (!!code_names.clue && !!code_names.guess_text);
+        this.state.winner = code_names.winner;
+      }
+    }
+  }
+
+  updateTurn(word = null) {
+    this.codeNames.updateTurn({turn: this.state.turn, word});
+  }
+
+  updateGuessCard({word, guesses, turn}) {
+    this.codeNames.updateGuessCard({
+      guesses,
+      word,
+    })
+  }
+
+  changeTurns(word = null) {
+    this.state.guesses = null;
+    this.state.max_guesses = null;
+    this.state.clue = null;
+    this.state.clue_state = null;
+    this.state.show_spy_master_info = false;
+    if(this.state.turn === this.state.team1.team_name) {
+      this.state.turn = this.state.team2.team_name;
+    } else {
+      this.state.turn = this.state.team1.team_name;
+    }
+    this.updateTurn(word);
+  }
+
+  guessCard(guessWord, rowIndex, colIndex, event) {
+    this.state.guesses -= 1;
+    let tile_team_name = null;
+    const word = this.state.words.find((element) => element.word === guessWord);
+    this.state.rows[rowIndex][colIndex].is_hidden = false;
+    word.hidden = false;
+    if(word.team_name === this.state.team1.team_name) {
+      this.state.team1.words = this.state.team1.words.filter((element) => element.word !== word.word);
+      tile_team_name = this.state.team1.team_name;
+    } else if(word.team_name === this.state.team2.team_name) {
+      this.state.team2.words = this.state.team2.words.filter((element) => element.word !== word.word);
+      tile_team_name = this.state.team2.team_name;
+    } else if(word.is_death_word) {
+      this.state.game_over = true;
+      this.state.winner = (this.state.turn === this.state.team1.team_name ? this.state.team2.team_name : this.state.team1.team_name)
+      this.changeTurns(word);
+      return;
+    }
+
+    if(this.state.team1.words.length === 0) {
+      this.state.winner = this.state.team1;
+    } else if(this.state.team2.words.length === 0) {
+      this.state.winner = this.state.team2;
+    }
+
+    if(!this.state.winner && (
+      this.state.guesses === 0
+      || this.state.turn !== tile_team_name
+    )
+      ) {
+      this.changeTurns(word);
+    } else {
+      this.updateGuessCard({word, guesses: this.state.guesses, turn: this.state.turn})
+    }
+  }
+
+  giveGuess(event) {
+    const guess = Number(event.target.textContent);
+    this.state.guess_text = guess;
+    this.state.clue = this.state.clue_state;
+    this.state.show_spy_master_info = true;
+    this.state.max_guesses = guess === 0 ? guess : guess + 1;
+    this.state.guesses = this.state.max_guesses;
+    this.codeNames.updateGiveGuess({
+      clue: this.state.clue,
+      guess_given: this.state.max_guesses,
+      guess_text: event.target.textContent,
+    });
+  }
+
+  updateGameCode(event) {
+    this.state.game_code_given = event.target.value;
+  }
+
+  changeClue(event) {
+    event.preventDefault();
+    this.state.clue_state = event.target.value;
+  }
+
+  handleClick(is_spy_master, event) {
+    event.preventDefault();
+    if(is_spy_master) {
+      this.state.spy_master = true;
+      this.state.active_toggle = 'spymaster';
+    } else {
+      this.state.spy_master = false;
+      this.state.active_toggle = 'field_operative';
+    }
+  }
+
+}
+<div>
+  <div class="header fixed-top my-2 mx-3">
+    <div class="col-3">
+      <if(!state.winner)>
+        <div class="float-left btn-group">
+          <button class=`btn ${state.active_toggle === 'field_operative' ? 'btn-primary' : 'btn-secondary'}` type="button" id="field_operative" onClick("handleClick", false)>
+            Field Operative
+          </button>
+          <button class=`btn ${state.active_toggle === 'spymaster' ? 'btn-primary' : 'btn-secondary'}` type="button" id="spymaster" onClick("handleClick", true)>
+            Spy Master
+          </button>
+        </div>
+      </if>
+    </div>
+    <div class="col-2 text-center">
+      <h5>Turn: <span class=`${state.turn === state.team1.team_name ? state.team1.text_color : state.team2.text_color}`>${state.turn}</span></h5>
+    </div>
+    <div class="col-2 justify-content-center">
+      <if(state.clue && state.guess_text && !state.spy_master && state.show_spy_master_info)>
+        <button class="btn btn-primary" onClick('changeTurns')>End Turn</button>
+      </if>
+    </div>
+    <div class="col-5">
+      <div class="row">
+        <div class="col-sm-8 float-left pr-0">
+          <div class="input-group">
+            <input type="text" placeholder="Code" value=`${state.game_code_given}`
+              on-input('updateGameCode')
+            />
+            <div class="input-group-append">
+              <if(!!state.game_code_given)>
+                <a class="btn btn-primary" type="button" id="button-addon2" href=`/projects/code_names/${state.game_code_given}`>Join</a>
+              </if>
+              <else>
+                <a class="btn btn-secondary" type="button" id="button-addon2" href='#'>Join</a>
+              </else>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4 justify-content-end pr-1">
+          <form class="float-right" action="/projects/code_names/new" method="POST">
+            <button class="btn btn-primary">New Game</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mt-4 position-static">
+    <if(!state.winner && state.turn)>
+      <if(state.spy_master)>
+        <for(row in state.rows)>
+          <div class="row my-2 row-card">
+            <for(col in row)>
+              <div class=`bg-${col.color} col h-100 border border-dark rounded py-4 m-1`>
+                <div class=`h3 m-1 font-weight-bold py-2 text-center ${col.text_color}`>${col.word}
+                  <if(!col.is_hidden)>
+                    <span class=`badge badge-${col.color}`>
+                      <svg class="bi bi-person-check" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M11 14s1 0 1-1-1-4-6-4-6 3-6 4 1 1 1 1h10zm-9.995-.944v-.002.002zM1.022 13h9.956a.274.274 0 0 0 .014-.002l.008-.002c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664a1.05 1.05 0 0 0 .022.004zm9.974.056v-.002.002zM6 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm6.854.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L12.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+                      </svg>
+                    </span>
+                  </if>
+                </div>
+              </div>
+            </for>
+          </div>
+        </for>
+      </if>
+      <else>
+        <for|row, rowIndex| of=state.rows>
+          <div class="row my-2 row-card">
+            <for|col, colIndex| of=row>
+              <if(col.is_hidden)>
+                <if(!!state.clue && !Number.isNaN(state.max_guesses))>
+                  <button class=`btn btn-light col h-100 border border-dark rounded py-4 m-1` onClick('guessCard', col.word, rowIndex, colIndex)>
+                    <div class=`h3 m-1 font-weight-bold py-2 text-center text-dark`>${col.word}</div>
+                  </button>
+                </if>
+                <else>
+                  <div class=`bg-light col h-100 border border-dark rounded py-4 m-1`>
+                    <div class=`h3 m-1 font-weight-bold py-2 text-center text-dark`>${col.word}</div>
+                  </div>
+                </else>
+              </if>
+              <else>
+                <div class=`bg-${col.color} col h-100 border border-dark rounded py-4 m-1`>
+                  <div class=`h3 m-1 font-weight-bold py-2 text-center ${col.text_color}`>${col.word}</div>
+                </div>
+              </else>
+            </for>
+          </div>
+        </for>
+      </else>
+    </if>
+  </div>
+  <if(!state.winner && state.turn)>
+  <!-- </div> -->
+    <div class="fixed-bottom">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-2">
+              <h5 class=`float-left card-title ${state.team1.text_color}`>Team ${state.team1.team_name}: ${state.team1.words.length}</h5>
+            </div>
+            <div class="col-8">
+              <if(state.show_spy_master_info)>
+                <div class="row">
+                  <div class="col-7">
+                    <h3 class="text-center">"${state.clue.toUpperCase()}"&nbsp;for&nbsp;${state.guess_text}&nbsp;words</h3>
+                  </div>
+                  <div class="col-5">
+                    <h3 class="text-center">Total guesses left: ${state.guesses}</h3>
+                  </div>
+                </div>
+              </if>
+              <else>
+                <if(!state.winner)>
+                  <if(state.turn && state.spy_master && !state.show_spy_master_info)>
+                    <div class="input-group justify-content-center">
+                      <input type="text" placeholder="Clue" value=`${state.clue_state || ''}` on-input('changeClue')>
+                      <div class="input-group-append">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">For</button>
+                        <div class="dropdown-menu">
+                          <for|word, wordIndex| of=(state.turn === state.team1.team_name ? state.team1.words : state.team2.words)>
+                            <div class="dropdown-item" onClick('giveGuess')>${wordIndex}</div>
+                          </for>
+                          <a class="dropdown-item" href="#">${(state.turn === state.team1.team_name ? state.team1.words.length : state.team2.words.length)}</a>
+                        </div>
+                      </div>
+                    </div>
+                  </if>
+                  <else>
+                    <h3 class="text-center">Waiting for clue...</h3>
+                  </else>
+                </if>
+              </else>
+            </div>
+            <div class="col-2">
+              <h5 class=`justify-content-end text-right card-title ${state.team2.text_color}`>Team ${state.team2.team_name}: ${state.team2.words.length}</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </if>
+  <else>
+    <div class="container my-4">
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <h4 class="text-center">WINNER IS TEAM ${state.winner}!</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row my-4">
+        <div class="col">
+          <div class="card">
+            <div class="card-header text-center">
+              BETTER LUCK NEXT TIME TEAM ${state.team1.team_name !== state.winner ? state.team1.team_name : state.team2.team_name}...
+            </div>
+            <div class="card-body d-flex justify-content-center">
+              <iframe src="https://giphy.com/embed/w8ltXRsJ5pv0s" width="300" height="300" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-header text-center">
+              CONGRATS TEAM ${state.winner}!
+            </div>
+            <div class="card-body d-flex justify-content-center">
+              <iframe src="https://giphy.com/embed/MEWeqM3BehSDLdghe2" width="350" height="300" class="giphy-embed" allowFullScreen></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </else>
+</div>

@@ -23,6 +23,7 @@ const development = (process.env.NODE_ENV === 'development');
 const users = require('./routes/users');
 const blog = require('./routes/blog');
 const profile = require('./routes/profile');
+const code_names = require('./routes/code_names')
 const contact = require('./routes/contact');
 const projects = require('./routes/projects');
 const cookieParser = require('cookie-parser');
@@ -37,9 +38,11 @@ const cookieParser = require('cookie-parser');
   }
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
-  app.use('/', express.static('public'));
+  //
   // app.use(express.static(__dirname + '/public'));
+  // console.log("__dirname + '/public'", __dirname + '/public');
   app.use(require('lasso/middleware').serveStatic());
+  app.use('/projects/code_names', express.static('public'));
   if(!development) {
     app.set('trust proxy', 1);
   }
@@ -67,6 +70,7 @@ const cookieParser = require('cookie-parser');
   app.use('/contact', contact);
   app.use('/profile', profile);
   app.use('/projects', projects);
+  app.use('/code_names', code_names);
   app.get('/', async function (req, res) {
     let query = [get('posts', ['post_id', 'title', 'content', 'user_id'])];
     let user;

@@ -1,0 +1,35 @@
+.col {
+  height: 50px;
+  width: 50px;
+}
+
+.row-card {
+  height: 115px;
+}
+
+.bg-tan {
+  background-color: #DCC6B3;
+}
+
+.header {
+  display: flex;
+  height: 50px;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+.header-col {
+  flex-basis: 0;
+flex-grow: 1;
+height: 50px;
+max-width: 100%;
+position: relative;
+width: 100%;
+padding-right: 15px;
+padding-left: 15px;
+}
+
+.fixed-bottom {
+  height: 70px;
+}
