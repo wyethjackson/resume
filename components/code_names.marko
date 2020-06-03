@@ -23,7 +23,7 @@ class {
       winner: code_names.winner || null,
       clue_state: null,
       spy_master: false,
-      game_code_given: '',
+      game_code_given: code_names.code_name_id || '',
       active_toggle: 'field_operative',
     }
     setInterval(this.refreshData.bind(this), 5000);
