@@ -117,16 +117,23 @@ class {
 
   giveGuess(event) {
     const guess = Number(event.target.textContent);
-    this.state.guess_text = guess;
-    this.state.clue = this.state.clue_state;
-    this.state.show_spy_master_info = true;
-    this.state.max_guesses = guess === 0 ? guess : guess + 1;
-    this.state.guesses = this.state.max_guesses;
-    this.codeNames.updateGiveGuess({
-      clue: this.state.clue,
-      guess_given: this.state.max_guesses,
-      guess_text: event.target.textContent,
-    });
+    if(!!this.state.clue_state) {
+      const turn_team = this.state.turn === this.state.team1.team_name ? this.state.team1 : this.state.team2;
+      this.state.guess_text = guess;
+      this.state.clue = this.state.clue_state;
+      this.state.show_spy_master_info = true;
+      if(guess === 0 || guess === turn_team.words.length) {
+        this.state.max_guesses = turn_team.words.length;
+      } else {
+        this.state.max_guesses = guess + 1;
+      }
+      this.state.guesses = this.state.max_guesses;
+      this.codeNames.updateGiveGuess({
+        clue: this.state.clue,
+        guess_given: this.state.max_guesses,
+        guess_text: event.target.textContent,
+      });
+    }
   }
 
   updateGameCode(event) {
@@ -165,12 +172,10 @@ class {
       </if>
     </div>
     <if(state.turn && state.team1 && !state.winner)>
-      <div class="col-2 text-center">
-        <h5>Turn: <span class=`${state.turn === state.team1.team_name ? state.team1.text_color : state.team2.text_color}`>${state.turn}</span></h5>
-      </div>
-      <div class="col-2 justify-content-center">
+      <div class="col-4">
+        <h3 class="float-left"> <span class=`badge badge-light border mr-2 border-${state.turn === 'RED' ? 'danger' : 'primary'} ${state.turn === state.team1.team_name ? state.team1.text_color : state.team2.text_color}`>${state.turn}</span></h3>
         <if(state.clue && state.guess_text && !state.spy_master && state.show_spy_master_info)>
-          <button class="btn btn-primary" onClick('changeTurns')>End Turn</button>
+          <button class="btn btn-primary btn-sm ml-2" onClick('changeTurns')>End Turn</button>
         </if>
       </div>
     </if>
@@ -210,7 +215,7 @@ class {
                   <div class=`h3 m-1 font-weight-bold py-2 text-center ${col.text_color}`>${col.word}
                     <if(!col.is_hidden)>
                       <span class=`badge badge-${col.color}`>
-                        <svg class="bi bi-person-check" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="bi bi-person-check mb-1" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                           <path fill-rule="evenodd" d="M11 14s1 0 1-1-1-4-6-4-6 3-6 4 1 1 1 1h10zm-9.995-.944v-.002.002zM1.022 13h9.956a.274.274 0 0 0 .014-.002l.008-.002c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664a1.05 1.05 0 0 0 .022.004zm9.974.056v-.002.002zM6 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm6.854.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L12.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
                         </svg>
                       </span>
@@ -279,7 +284,7 @@ class {
                             <for|word, wordIndex| of=(state.turn === state.team1.team_name ? state.team1.words : state.team2.words)>
                               <div class="dropdown-item" onClick('giveGuess')>${wordIndex}</div>
                             </for>
-                            <a class="dropdown-item" href="#">${(state.turn === state.team1.team_name ? state.team1.words.length : state.team2.words.length)}</a>
+                            <div class="dropdown-item" onClick('giveGuess')>${(state.turn === state.team1.team_name ? state.team1.words.length : state.team2.words.length)}</div>
                           </div>
                         </div>
                       </div>

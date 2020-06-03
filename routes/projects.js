@@ -46,7 +46,7 @@ async function getGameDetails(code_name_id) {
       word.text_color = 'text-white';
     } else {
       word.color = 'tan';
-      word.text_color = 'text-dark';
+      word.text_color = 'text-white';
     }
 
     col.push(word);
@@ -72,7 +72,7 @@ async function getGameDetails(code_name_id) {
 }
 
 router.get('/', async function (req, res) {
-  res.marko(index, {path: '../', page_id: 'PROJECTS', active_index: 1});
+  res.marko(index, {path: '../', page_id: 'PROJECTS', active_index: 1, hide_nav: true});
 });
 
 router.get('/code_names', async function (req, res) {
