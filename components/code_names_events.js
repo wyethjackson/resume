@@ -14,32 +14,33 @@ class CodeNamesEvents extends EventEmitter {
   }
 
   fetch() {
-    return wretch(`https://wyethjackson-resume-staging.herokuapp.com/projects/code_names/${this.code_name_id}/ajax`)
+    return wretch(`http://localhost:5000/projects/code_names/${this.code_name_id}/ajax`)
       .get()
       .json((body) => body)
       .catch(error => { console.log("ERROR>>> ", error) })
   }
 
-  updateGuessCard({word, guesses, turn}) {
-    wretch(`https://wyethjackson-resume-staging.herokuapp.com/projects/code_names/${this.code_name_id}/ajax`)
+  updateGuessCard({word, guesses, turn, winner}) {
+    wretch(`http://localhost:5000/projects/code_names/${this.code_name_id}/ajax`)
       .post({
         word,
         guesses,
-        turn
+        turn,
+        winner,
       })
       .res(response => console.log("UPDATE GUESS CARD RESPONSE", response))
       .catch(error => { console.log("ERROR>>> ", error) })
   }
 
   updateTurn({turn, word}) {
-    wretch(`https://wyethjackson-resume-staging.herokuapp.com/projects/code_names/${this.code_name_id}/ajax`)
+    wretch(`http://localhost:5000/projects/code_names/${this.code_name_id}/ajax`)
       .post({turn, word})
       .res(response => console.log("UPDATE TURN RESPONSE", response))
       .catch(error => { console.log("ERROR>>> ", error) })
   }
 
   updateGiveGuess({clue, guess_given, guess_text}) {
-    wretch(`https://wyethjackson-resume-staging.herokuapp.com/projects/code_names/${this.code_name_id}/ajax`)
+    wretch(`http://localhost:5000/projects/code_names/${this.code_name_id}/ajax`)
       .post({clue, guess_given, guess_text})
       .res(response => console.log("UPDATE TURN RESPONSE", response))
       .catch(error => { console.log("ERROR>>> ", error) })
