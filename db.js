@@ -188,29 +188,20 @@ async function update_game({
       updateWord = client.query(updateWord);
       updates.push(updateWord);
     }
-    if(!!word && word.is_death_word) {
+    if(!!winner) {
       let updateGame = `UPDATE code_names
         SET winner = (
-          SELECT team_name FROM code_name_team WHERE team_name != '${turn}' AND code_name_id = '${code_name_id}'
+          SELECT team_name FROM code_name_team WHERE team_name = '${winner}' AND code_name_id = '${code_name_id}'
         )
         WHERE code_name_id = '${code_name_id}'`;
-        updateGame = client.query(updateGame);
-        updates.push(updateGame);
-    } else if(!!winner) {
-      let updateGame = `UPDATE code_names
-        SET winner = (
-          SELECT team_name FROM code_name_team WHERE team_name != '${winner}' AND code_name_id = '${code_name_id}'
-        )
-        WHERE code_name_id = '${code_name_id}'`;
-        console.log("WINNER SQL:: ", updateGame);
-        console.log("SWLLL ", updateGame);
+
         updateGame = client.query(updateGame);
         updates.push(updateGame);
     }
 
     await Promise.all(updates);
   } catch(err) {
-    console.log(err);
+    console.log(err.message);
     return {error: true};
   }
   return {error: false};

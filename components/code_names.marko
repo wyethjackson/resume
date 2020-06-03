@@ -97,9 +97,9 @@ class {
     }
 
     if(this.state.team1.words.length === 0) {
-      this.state.winner = this.state.team1;
+      this.state.winner = this.state.team1.team_name;
     } else if(this.state.team2.words.length === 0) {
-      this.state.winner = this.state.team2;
+      this.state.winner = this.state.team2.team_name;
     }
 
     if(!this.state.winner && (
@@ -109,7 +109,7 @@ class {
       ) {
       this.changeTurns(word);
     } else if(!!this.state.winner) {
-      this.updateGuessCard({word, guesses: this.state.guesses, winner: this.state.winner.team_name})
+      this.updateGuessCard({word, guesses: this.state.guesses, winner: this.state.winner})
     } else {
       this.updateGuessCard({word, guesses: this.state.guesses, turn: this.state.turn})
     }
