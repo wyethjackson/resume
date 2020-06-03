@@ -3,7 +3,7 @@ import CodeNamesEvents from "./code_names_events";
 class {
   onInput(input) {
     if(!!input.code_names) {
-      this.codeNames = new CodeNamesEvents(input.code_names.code_name_id);
+      this.codeNames = new CodeNamesEvents(input.code_names.code_name_id, input.host_url);
     }
     const code_names = !!input.code_names ? input.code_names : {};
     this.state = {
@@ -25,6 +25,7 @@ class {
       spy_master: false,
       game_code_given: code_names.code_name_id || '',
       active_toggle: 'field_operative',
+      game_over_active_toggle: 'see_who_won',
     }
     setInterval(this.refreshData.bind(this), 5000);
   }
@@ -153,6 +154,14 @@ class {
     } else {
       this.state.spy_master = false;
       this.state.active_toggle = 'field_operative';
+    }
+  }
+
+  handleGameOverToggleClick(is_spy_master) {
+    if(is_spy_master) {
+      this.state.game_over_active_toggle = 'spymaster';
+    } else {
+      this.state.game_over_active_toggle = 'see_who_won';
     }
   }
 
@@ -305,31 +314,62 @@ class {
     </if>
     <else>
       <div class="my-5">
-        <div class="card">
-          <div class="card-body">
-            <h4 class="text-center">WINNER IS TEAM ${state.winner}!</h4>
-          </div>
-        </div>
-        <div class="row my-4">
-          <div class="col">
-            <div class="card">
-              <div class="card-header text-center">
-                BETTER LUCK NEXT TIME TEAM ${state.team1.team_name !== state.winner ? state.team1.team_name : state.team2.team_name}...
+        <if(state.game_over_active_toggle === 'spymaster')>
+          <div class="mt-4 position-static">
+            <for(row in state.rows)>
+              <div class="row my-2 row-card">
+                <for(col in row)>
+                  <div class=`bg-${col.color} col h-100 border border-dark rounded py-4 m-1`>
+                    <div class=`h3 m-1 font-weight-bold py-2 text-center ${col.text_color}`>${col.word}
+                      <if(!col.is_hidden)>
+                        <span class=`badge badge-${col.color}`>
+                          <svg class="bi bi-person-check mb-1" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M11 14s1 0 1-1-1-4-6-4-6 3-6 4 1 1 1 1h10zm-9.995-.944v-.002.002zM1.022 13h9.956a.274.274 0 0 0 .014-.002l.008-.002c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664a1.05 1.05 0 0 0 .022.004zm9.974.056v-.002.002zM6 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm6.854.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L12.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+                          </svg>
+                        </span>
+                      </if>
+                    </div>
+                  </div>
+                </for>
               </div>
-              <div class="card-body d-flex justify-content-center">
-                <iframe src="https://giphy.com/embed/w8ltXRsJ5pv0s" width="300" height="300" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+            </for>
+          </div>
+        </if>
+        <else>
+          <div class="row justify-content-center">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="text-center">WINNER IS TEAM ${state.winner}!</h4>
               </div>
             </div>
           </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-header text-center">
-                CONGRATS TEAM ${state.winner}!
+          <div class="row my-4 justify-content-center">
+              <div class="card m-2">
+                <div class="card-header text-center">
+                  BETTER LUCK NEXT TIME TEAM ${state.team1.team_name !== state.winner ? state.team1.team_name : state.team2.team_name}...
+                </div>
+                <div class="card-body d-flex justify-content-center">
+                  <iframe src="https://giphy.com/embed/w8ltXRsJ5pv0s" width="300" height="300" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+                </div>
               </div>
-              <div class="card-body d-flex justify-content-center">
-                <iframe src="https://giphy.com/embed/MEWeqM3BehSDLdghe2" width="350" height="300" class="giphy-embed" allowFullScreen></iframe>
+              <div class="card m-2">
+                <div class="card-header text-center">
+                  CONGRATS TEAM ${state.winner}!
+                </div>
+                <div class="card-body d-flex justify-content-center">
+                  <iframe src="https://giphy.com/embed/MEWeqM3BehSDLdghe2" width="350" height="300" class="giphy-embed" allowFullScreen></iframe>
+                </div>
               </div>
-            </div>
+          </div>
+        </else>
+        <div class="row justify-content-center fixed-bottom">
+          <div class="btn-group my-4">
+            <button class=`btn ${state.game_over_active_toggle === 'see_who_won' ? 'btn-primary' : 'btn-secondary'}` type="button" onClick("handleGameOverToggleClick", false)>
+              See Who Won
+            </button>
+            <button class=`btn ${state.game_over_active_toggle === 'spymaster' ? 'btn-primary' : 'btn-secondary'}` type="button" onClick("handleGameOverToggleClick", true)>
+              Spy Master Board
+            </button>
           </div>
         </div>
       </div>

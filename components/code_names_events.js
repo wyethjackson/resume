@@ -8,41 +8,42 @@ wretch().polyfills({
     URLSearchParams: require("url").URLSearchParams
 });
 class CodeNamesEvents extends EventEmitter {
-  constructor(code_name_id) {
+  constructor(code_name_id, host_url) {
     super();
     this.code_name_id = code_name_id;
+    this.host_url = host_url;
   }
 
   fetch() {
-    return wretch(`https://wyethjackson-resume-staging.herokuapp.com/projects/code_names/${this.code_name_id}/ajax`)
+    return wretch(`${this.host_url}/projects/code_names/${this.code_name_id}/ajax`)
       .get()
       .json((body) => body)
       .catch(error => { console.log("ERROR>>> ", error) })
   }
 
   updateGuessCard({word, guesses, turn, winner}) {
-    wretch(`https://wyethjackson-resume-staging.herokuapp.com/projects/code_names/${this.code_name_id}/ajax`)
+    wretch(`${this.host_url}/projects/code_names/${this.code_name_id}/ajax`)
       .post({
         word,
         guesses,
         turn,
         winner,
       })
-      .res(response => console.log("UPDATE GUESS CARD RESPONSE", response))
+      .res(response => response)
       .catch(error => { console.log("ERROR>>> ", error) })
   }
 
   updateTurn({turn, word}) {
-    wretch(`https://wyethjackson-resume-staging.herokuapp.com/projects/code_names/${this.code_name_id}/ajax`)
+    wretch(`${this.host_url}/projects/code_names/${this.code_name_id}/ajax`)
       .post({turn, word})
-      .res(response => console.log("UPDATE TURN RESPONSE", response))
+      .res(response => response)
       .catch(error => { console.log("ERROR>>> ", error) })
   }
 
   updateGiveGuess({clue, guess_given, guess_text}) {
-    wretch(`https://wyethjackson-resume-staging.herokuapp.com/projects/code_names/${this.code_name_id}/ajax`)
+    wretch(`${this.host_url}/projects/code_names/${this.code_name_id}/ajax`)
       .post({clue, guess_given, guess_text})
-      .res(response => console.log("UPDATE TURN RESPONSE", response))
+      .res(response => response)
       .catch(error => { console.log("ERROR>>> ", error) })
   }
 }

@@ -24,6 +24,7 @@ class {
         path: input.path,
         code_names: input.code_names,
         hide_nav: input.hide_nav || false,
+        host_url: input.host_url,
       }
     }
 
@@ -57,6 +58,6 @@ class {
     </for>
   </div>
   <if(state.pages[state.active_index])>
-    <${(state.pages[state.active_index]).page} path=(state.path) sub_active_index=((state.pages[state.active_index]).active_index) posts=(state.posts) user=(state.user) code_names=(state.code_names)/>
+    <${(state.pages[state.active_index]).page} path=(state.path) sub_active_index=((state.pages[state.active_index]).active_index) posts=(state.posts) user=(state.user) code_names=(state.code_names) host_url=(state.host_url)/>
   </if>
 </div>

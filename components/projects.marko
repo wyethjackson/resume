@@ -3,11 +3,12 @@ class {
   onInput(input) {
     this.state = {
       code_names: input.code_names,
-      game_url: '#'
+      game_url: '#',
+      host_url: input.host_url,
     }
   }
 }
 
 <div>
-  <${CodeNames} code_names=(state.code_names) />
+  <${CodeNames} code_names=(state.code_names) host_url=(state.host_url) />
 </div>
