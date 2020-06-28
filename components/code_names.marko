@@ -16,6 +16,7 @@ class {
       code_name_id: code_names.code_name_id,
       guesses: code_names.max_guesses || 0,
       max_guesses: code_names.guesses || null,
+      has_guessed_all_clues: code_names.has_guessed_all_clues,
       clue: code_names.clue || null,
       guess_text: code_names.guess_text || null,
       game_over: (!code_names.code_name_id || !!code_names.winner),
@@ -26,6 +27,7 @@ class {
       game_code_given: code_names.code_name_id || '',
       active_toggle: 'field_operative',
       game_over_active_toggle: 'see_who_won',
+      toast: {is_hidden: true, message: '', header: ''}
     }
     setInterval(this.refreshData.bind(this), 5000);
   }
@@ -45,17 +47,32 @@ class {
         this.state.team2 = code_names.team2;
         this.state.guesses = code_names.guesses;
         this.state.max_guesses = code_names.max_guesses;
+        this.state.has_guessed_all_clues = code_names.has_guessed_all_clues;
         this.state.clue = code_names.clue;
         this.state.guess_text = code_names.guess_text;
         this.state.game_over = code_names.game_over;
         this.state.show_spy_master_info = (!!code_names.clue && !!code_names.guess_text);
-        this.state.winner = code_names.winner;
+        setTimeout(this.handleWin.bind(this), 2000, code_names.winner);
       }
     }
   }
 
-  updateTurn(word = null) {
-    this.codeNames.updateTurn({turn: this.state.turn, word});
+  handleWin(winner) {
+    if(this.state.winner !== winner) {
+      this.state.winner = winner;
+    }
+  }
+
+  throwModal(header, message) {
+    this.state.toast = {
+      is_hidden: false,
+      header,
+      message,
+    }
+  }
+
+  updateTurn(word = null, has_guessed_all_clues = null) {
+    this.codeNames.updateTurn({turn: this.state.turn, word, has_guessed_all_clues});
   }
 
   updateGuessCard({word, guesses, turn, winner}) {
@@ -66,7 +83,7 @@ class {
     })
   }
 
-  changeTurns(word = null) {
+  changeTurns(word = null, has_guessed_all_clues = null) {
     this.state.guesses = null;
     this.state.max_guesses = null;
     this.state.clue = null;
@@ -74,13 +91,20 @@ class {
     this.state.show_spy_master_info = false;
     if(this.state.turn === this.state.team1.team_name) {
       this.state.turn = this.state.team2.team_name;
+      this.state.has_guessed_all_clues = this.state.team2.has_guessed_all_clues;
     } else {
       this.state.turn = this.state.team1.team_name;
+      this.state.has_guessed_all_clues = this.state.team1.has_guessed_all_clues;
     }
-    this.updateTurn(word);
+    this.updateTurn(word, has_guessed_all_clues);
+  }
+
+  handleGuessCard(guessWord, rowIndex, colIndex, event) {
+    setTimeout(this.guessCard.bind(this), 1000, guessWord, rowIndex, colIndex, event);
   }
 
   guessCard(guessWord, rowIndex, colIndex, event) {
+    let winner = this.state.winner;
     this.state.guesses -= 1;
     let tile_team_name = null;
     const word = this.state.words.find((element) => element.word === guessWord);
@@ -94,26 +118,30 @@ class {
       tile_team_name = this.state.team2.team_name;
     } else if(word.is_death_word) {
       this.state.game_over = true;
-      this.state.winner = (this.state.turn === this.state.team1.team_name ? this.state.team2.team_name : this.state.team1.team_name);
+      winner = (this.state.turn === this.state.team1.team_name ? this.state.team2.team_name : this.state.team1.team_name);
     }
 
     if(this.state.team1.words.length === 0) {
-      this.state.winner = this.state.team1.team_name;
+      winner = this.state.team1.team_name;
     } else if(this.state.team2.words.length === 0) {
-      this.state.winner = this.state.team2.team_name;
+      winner = this.state.team2.team_name;
     }
-
-    if(!this.state.winner && (
+    let has_guessed_all_clues = this.state.has_guessed_all_clues;
+    if(!winner && (
       this.state.guesses === 0
       || this.state.turn !== tile_team_name
     )
       ) {
-      this.changeTurns(word);
-    } else if(!!this.state.winner) {
-      this.updateGuessCard({word, guesses: this.state.guesses, winner: this.state.winner})
+      if(this.state.turn !== tile_team_name && !!has_guessed_all_clues) {
+        has_guessed_all_clues = false;
+      }
+      this.changeTurns(word, has_guessed_all_clues);
+    } else if(!!winner) {
+      this.updateGuessCard({word, guesses: this.state.guesses, winner: winner})
     } else {
       this.updateGuessCard({word, guesses: this.state.guesses, turn: this.state.turn})
     }
+    this.handleWin(winner);
   }
 
   giveGuess(event) {
@@ -126,7 +154,7 @@ class {
       if(guess === 0 || guess === turn_team.words.length) {
         this.state.max_guesses = turn_team.words.length;
       } else {
-        this.state.max_guesses = guess + 1;
+        this.state.max_guesses = (this.state.has_guessed_all_clues ? guess : guess + 1);
       }
       this.state.guesses = this.state.max_guesses;
       this.codeNames.updateGiveGuess({
@@ -134,6 +162,7 @@ class {
         guess_given: this.state.max_guesses,
         guess_text: event.target.textContent,
       });
+      this.state.clue_state = '';
     }
   }
 
@@ -167,14 +196,44 @@ class {
 
 }
 <div>
+  <div class="modal fade" id="spymasterThinking" tabindex="-1" role="dialog" aria-labelledby="spymasterThinkingLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="spymasterThinkingLabel">Hold Up</h5>
+        </div>
+        <div class="modal-body">
+          SpyMaster is still thinking!
+        </div>
+        <div class="modal-footer" data-dismiss="modal">
+          <button type="button" class="btn btn-primary">Fine.</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="alreadyGuessed" tabindex="-1" role="dialog" aria-labelledby="alreadyGuessedLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="alreadyGuessedLabel">Hold Up</h5>
+        </div>
+        <div class="modal-body">
+          This word was already guessed!
+        </div>
+        <div class="modal-footer" data-dismiss="modal">
+          <button type="button" class="btn btn-primary">That doesn't help me.</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="header fixed-top my-2 mx-3">
     <div class="col-3">
       <if(!state.winner)>
         <div class="float-left btn-group">
-          <button class=`btn ${state.active_toggle === 'field_operative' ? 'btn-primary' : 'btn-secondary'}` type="button" id="field_operative" onClick("handleClick", false)>
-            Field Operative
+          <button class=`btn btn-toggle ${state.active_toggle === 'field_operative' ? 'btn-toggle-primary font-weight-bold border-primary' : 'btn-light border-left border-top border-bottom border-secondary'}` type="button" id="field_operative" onClick("handleClick", false)>
+            Operative
           </button>
-          <button class=`btn ${state.active_toggle === 'spymaster' ? 'btn-primary' : 'btn-secondary'}` type="button" id="spymaster" onClick("handleClick", true)>
+          <button class=`btn btn-toggle ${state.active_toggle === 'spymaster' ? 'btn-toggle-primary font-weight-bold border-primary' : 'btn-light border-right border-top border-bottom border-secondary'}` type="button" id="spymaster" onClick("handleClick", true)>
             Spy Master
           </button>
         </div>
@@ -182,9 +241,9 @@ class {
     </div>
     <if(state.turn && state.team1 && !state.winner)>
       <div class="col-4">
-        <h3 class="float-left"> <span class=`badge badge-light border mr-2 border-${state.turn === 'RED' ? 'danger' : 'primary'} ${state.turn === state.team1.team_name ? state.team1.text_color : state.team2.text_color}`>${state.turn}</span></h3>
+        <h3 class="float-left"> <span class=`badge badge-light border mr-2 py-2 border-${state.turn === 'RED' ? 'danger' : 'primary'} ${state.turn === state.team1.team_name ? state.team1.text_color : state.team2.text_color}`>${state.turn}</span></h3>
         <if(state.clue && state.guess_text && !state.spy_master && state.show_spy_master_info)>
-          <button class="btn btn-primary btn-sm ml-2" onClick('changeTurns')>End Turn</button>
+          <button class="btn btn-nav border-primary font-weight-bold btn-sm ml-2 py-2" onClick('changeTurns')>End Turn</button>
         </if>
       </div>
     </if>
@@ -197,22 +256,35 @@ class {
             />
             <div class="input-group-append">
               <if(!!state.game_code_given)>
-                <a class="btn btn-primary" type="button" id="button-addon2" href=`/projects/code_names/${state.game_code_given}`>Join</a>
+                <a class="btn btn-nav border-primary font-weight-bold" type="button" id="button-addon2" href=`/projects/code_names/${state.game_code_given}`>Join</a>
               </if>
               <else>
-                <a class="btn btn-secondary" type="button" id="button-addon2" href='#'>Join</a>
+                <a class="btn btn-nav border-primary font-weight-bold" type="button" id="button-addon2" href='#'>Join</a>
               </else>
             </div>
           </div>
         </div>
         <div class="col-sm-4 justify-content-end pr-1">
           <form class="float-right" action="/projects/code_names/new" method="POST">
-            <button class="btn btn-primary">New Game</button>
+            <button class="btn btn-nav border-primary font-weight-bold">New Game</button>
           </form>
         </div>
       </div>
     </div>
   </div>
+  <if(!state.toast.is_hidden)>
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <strong class="mr-auto">${state.toast.header}</strong>
+        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="toast-body">
+        ${state.toast.message}
+      </div>
+    </div>
+  </if>
   <if(!!state.turn && !!state.team1)>
     <div class="mt-4 position-static">
       <if(!state.winner && state.turn)>
@@ -220,17 +292,18 @@ class {
           <for(row in state.rows)>
             <div class="row my-2 row-card">
               <for(col in row)>
-                <div class=`bg-${col.color} col h-100 border border-dark rounded py-4 m-1`>
-                  <div class=`h3 m-1 font-weight-bold py-2 text-center ${col.text_color}`>${col.word}
+                <button class=`btn bg-${col.color} ${col.text_color} col h-100 border border-dark rounded m-1`>
+                  <span class=`h3 align-middle font-weight-bold ${col.text_color} text-center`>
+                    ${col.word}
                     <if(!col.is_hidden)>
                       <span class=`badge badge-${col.color}`>
-                        <svg class="bi bi-person-check mb-1" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="bi bi-person-check mb-1" width="1.5em" height="1.5em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                           <path fill-rule="evenodd" d="M11 14s1 0 1-1-1-4-6-4-6 3-6 4 1 1 1 1h10zm-9.995-.944v-.002.002zM1.022 13h9.956a.274.274 0 0 0 .014-.002l.008-.002c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664a1.05 1.05 0 0 0 .022.004zm9.974.056v-.002.002zM6 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm6.854.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L12.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
                         </svg>
                       </span>
                     </if>
-                  </div>
-                </div>
+                  </span>
+                </button>
               </for>
             </div>
           </for>
@@ -241,20 +314,24 @@ class {
               <for|col, colIndex| of=row>
                 <if(col.is_hidden)>
                   <if(!!state.clue && !Number.isNaN(state.max_guesses))>
-                    <button class=`btn btn-light col h-100 border border-dark rounded py-4 m-1` onClick('guessCard', col.word, rowIndex, colIndex)>
-                      <div class=`h3 m-1 font-weight-bold py-2 text-center text-dark`>${col.word}</div>
+                    <button class=`btn btn-light col h-100 border border-dark rounded py-4 m-1` onClick('handleGuessCard', col.word, rowIndex, colIndex)>
+                      <span class=`h3 align-middle m-1 font-weight-bold py-2 text-center text-dark`>${col.word}</span>
                     </button>
                   </if>
                   <else>
-                    <div class=`bg-light col h-100 border border-dark rounded py-4 m-1`>
-                      <div class=`h3 m-1 font-weight-bold py-2 text-center text-dark`>${col.word}</div>
-                    </div>
+                    <button class=" btn btn-light col h-100 border border-dark rounded m-1" data-toggle="modal" data-target="#spymasterThinking">
+                      <span class=`h3 align-middle font-weight-bold text-dark btn-code text-center`>
+                        ${col.word}
+                      </span>
+                    </button>
                   </else>
                 </if>
                 <else>
-                  <div class=`bg-${col.color} col h-100 border border-dark rounded py-4 m-1`>
-                    <div class=`h3 m-1 font-weight-bold py-2 text-center ${col.text_color}`>${col.word}</div>
-                  </div>
+                  <button class=`btn bg-${col.color} col h-100 border border-dark rounded m-1` data-toggle="modal" data-target="#alreadyGuessed">
+                    <span class=`h3 align-middle font-weight-bold ${col.text_color} text-center`>
+                      ${col.word}
+                    </span>
+                  </button>
                 </else>
               </for>
             </div>
@@ -263,15 +340,19 @@ class {
       </if>
     </div>
     <if(!state.winner && state.turn)>
-    <!-- </div> -->
       <div class="fixed-bottom">
         <div class="card">
           <div class="card-body">
             <div class="row">
-              <div class="col-2">
-                <h5 class=`float-left card-title ${state.team1.text_color}`>Team ${state.team1.team_name}: ${state.team1.words.length}</h5>
+              <div class="col-1">
+                <h3>
+                  <span class=`badge mb-1 badge-light border mr-2 border-${state.team1.team_name === 'RED' ? 'danger' : 'primary'} ${state.team1.text_color}`>${state.team1.words.length}</span>
+                  <div class="progress" style="height: 3px;">
+                    <div class=`progress-bar bg-${state.team1.team_name === 'RED' ? 'danger' : 'primary'}` role="progressbar" style=`width: ${((state.team1.total_word_count - state.team1.words.length)/state.team1.total_word_count) * 100}%;` aria-valuenow=`${state.team1.total_word_count - state.team1.words.length}` aria-valuemin="0" aria-valuemax=`${state.team1.total_word_count}`></div>
+                  </div>
+                </h3>
               </div>
-              <div class="col-8">
+              <div class="col-10">
                 <if(state.show_spy_master_info)>
                   <div class="row">
                     <div class="col-7">
@@ -299,13 +380,27 @@ class {
                       </div>
                     </if>
                     <else>
-                      <h3 class="text-center">Waiting for clue...</h3>
+                      <div class="row justify-content-center">
+                        <div class="col-1">
+                          <div class=`spinner-border text-${state.turn === 'RED' ? 'danger' : 'primary'}` role="status">
+                            <span class="sr-only">Loading...</span>
+                          </div>
+                        </div>
+                        <div class="col-5">
+                          <h3 class="text-center">SpyMaster Thinking...</h3>
+                        </div>
+                      </div>
                     </else>
                   </if>
                 </else>
               </div>
-              <div class="col-2">
-                <h5 class=`justify-content-end text-right card-title ${state.team2.text_color}`>Team ${state.team2.team_name}: ${state.team2.words.length}</h5>
+              <div class="col-1">
+                <h3 class="justify-content-end">
+                  <span class=`badge mb-1 badge-light border mr-2 border-${state.team2.team_name === 'RED' ? 'danger' : 'primary'} ${state.team2.text_color}`>${state.team2.words.length}</span>
+                  <div class="progress" style="height: 3px;">
+                    <div class=`progress-bar bg-${state.team2.team_name === 'RED' ? 'danger' : 'primary'}` role="progressbar" style=`width: ${((state.team2.total_word_count-state.team2.words.length)/state.team2.total_word_count) * 100}%;` aria-valuenow=`${state.team2.total_word_count - state.team2.words.length}` aria-valuemin="0" aria-valuemax=`${state.team2.total_word_count}`></div>
+                  </div>
+                </h3>
               </div>
             </div>
           </div>

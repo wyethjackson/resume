@@ -144,6 +144,7 @@ async function update_game({
   clue,
   guess_given,
   turn,
+  has_guessed_all_clues,
   guesses,
   guess_text,
   word,
@@ -163,6 +164,10 @@ async function update_game({
     }
 
     if(turn) {
+      if(typeof has_guessed_all_clues === 'boolean' && !has_guessed_all_clues) {
+        const updateGuessedClues = `UPDATE code_name_team SET has_guessed_all_clues = false WHERE code_name_id = '${code_name_id}' AND code_name_team_id = (SELECT code_name_team_id FROM code_name_turns WHERE code_name_id = '${code_name_id}' AND archived IS NULL)`;
+        await client.query(updateGuessedClues);
+      }
       let updateGame = `WITH code_name_update AS (
           UPDATE code_name_turns
           SET archived = NOW()
@@ -201,7 +206,7 @@ async function update_game({
 
     await Promise.all(updates);
   } catch(err) {
-    console.log(err.message);
+    console.log("Error in DB.js LINE 209: ", err.message);
     return {error: true};
   }
   return {error: false};
@@ -221,12 +226,13 @@ async function get_code_name_game(code_name_id) {
     cnt.clue,
     cnt.guess_count,
     cnt.max_guesses,
+    cnte.has_guessed_all_clues,
     cnt.guess_text
     FROM code_name_turns cnt
     INNER JOIN code_name_team cnte ON cnte.code_name_team_id = cnt.code_name_team_id
     WHERE cnt.code_name_id = '${code_name_id}' AND archived IS NULL`;
     let code_name_turn_query = client.query(code_name_turn_sql);
-    let code_name_teams_sql = `SELECT team_name FROM code_name_team WHERE code_name_id = '${code_name_id}'`;
+    let code_name_teams_sql = `SELECT team_name, has_guessed_all_clues FROM code_name_team WHERE code_name_id = '${code_name_id}'`;
     let code_name_teams_query = client.query(code_name_teams_sql);
     let code_name_winner_sql = `SELECT winner FROM code_names WHERE code_name_id = '${code_name_id}'`;
     let code_name_winner_query = client.query(code_name_winner_sql);
@@ -236,13 +242,14 @@ async function get_code_name_game(code_name_id) {
       turn: code_name_turn_result.rows[0].team_name,
       guesses: code_name_turn_result.rows[0].guess_count,
       max_guesses: code_name_turn_result.rows[0].max_guesses,
+      has_guessed_all_clues: code_name_turn_result.rows[0].has_guessed_all_clues,
       clue: code_name_turn_result.rows[0].clue,
       guess_text: code_name_turn_result.rows[0].guess_text,
       teams: code_name_teams_result.rows,
       winner: code_name_winner_result.rows.length > 0 ? code_name_winner_result.rows[0].winner : null
     };
   } catch(error) {
-    console.log("joiejsgiojrejgsj ", error.message);
+    console.log("Error in DB.js LINE 252: ", error.message);
     return {err: true, message: error.message};
   }
 }

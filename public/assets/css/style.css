@@ -11,6 +11,34 @@
   background-color: #BCA794;
 }
 
+.btn-toggle-primary {
+  color: #277FEC;
+  background: rgba(189, 216, 248, 0.4);
+}
+
+.btn-nav {
+  background-color: #f8f9fa;
+  color: #212529;
+  border-color: #6c757d!important;
+  border: 1px solid
+
+}
+
+.btn-nav:hover {
+  color: #277FEC;
+  background: rgba(189, 216, 248, 0.4);
+  weight: bold;
+}
+
+.btn-toggle-primary:hover {
+  color: #277FEC;
+  background: rgba(189, 216, 248, 0.4);
+}
+
+.btn-toggle {
+ width: 120px;
+}
+
 .header {
   display: flex;
   height: 50px;

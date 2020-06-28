@@ -11,7 +11,7 @@ class {
         active_index: input.active_index || 0,
         pages: [
           {page: Profile, name: 'Profile'},
-          {page: Projects, name: 'Projects'},
+          {page: Projects, name: 'Projects', hide_nav: true, host_url: input.host_url},
           {page: Blog, name: 'Blog'},
           {page: Contact, name: 'Contact'},
           {page: Users, name: `${input.user ? `${input.user.name}` : 'Sign In'}`, active_index: input.users_active_index || 0},
@@ -23,12 +23,15 @@ class {
         alarms: input.alarms,
         path: input.path,
         code_names: input.code_names,
-        hide_nav: input.hide_nav || false,
+        hide_nav: input.hide_nav,
         host_url: input.host_url,
       }
     }
 
     navigate(index, event) {
+      if(this.state.pages[index].name === 'Projects') {
+        this.state.hide_nav = true;
+      }
       this.state.active_index = Number(index);
     }
 }
@@ -58,6 +61,6 @@ class {
     </for>
   </div>
   <if(state.pages[state.active_index])>
-    <${(state.pages[state.active_index]).page} path=(state.path) sub_active_index=((state.pages[state.active_index]).active_index) posts=(state.posts) user=(state.user) code_names=(state.code_names) host_url=(state.host_url)/>
+    <${(state.pages[state.active_index]).page} path=(state.path) hide_nav=(state.hide_nav) sub_active_index=((state.pages[state.active_index]).active_index) posts=(state.posts) user=(state.user) code_names=(state.code_names) host_url=(state.host_url)/>
   </if>
 </div>

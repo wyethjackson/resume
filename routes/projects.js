@@ -15,31 +15,37 @@ async function getGameDetails(code_name_id) {
   if(!game || !game.teams) {
     return {};
   }
-  let team1 = {team_name: (!!game.teams[0] && game.teams[0].team_name), words: []};
-  let team2 = {team_name: (!!game.teams[1] && game.teams[1].team_name), words: []};
+  let team1 = {team_name: (!!game.teams[0] && game.teams[0].team_name), words: [], total_word_count: 0};
+  let team2 = {team_name: (!!game.teams[1] && game.teams[1].team_name), words: [], total_word_count: 0};
   if(team1.team_name === "BLUE") {
     team1.text_color = 'text-primary';
+    team1.color = 'primary';
   } else {
     team1.text_color = 'text-danger';
+    team1.color = 'danger';
   }
 
   if(team2.team_name === "BLUE") {
     team2.text_color = 'text-primary';
+    team2.color = 'primary';
   } else {
     team2.text_color = 'text-danger';
+    team2.color = 'danger';
   }
   (game.words || []).forEach((word) => {
     if(team1.team_name === word.team_name) {
+      team1.total_word_count++
       if(word.is_hidden) {
         team1.words.push(word);
       }
-      word.color = 'primary';
+      word.color = team1.color;
       word.text_color = 'text-white';
     } else if(team2.team_name === word.team_name) {
+      team2.total_word_count++
       if(word.is_hidden) {
         team2.words.push(word);
       }
-      word.color = 'danger';
+      word.color = team2.color;
       word.text_color = 'text-white';
     } else if(word.is_death_word) {
       word.color = 'dark';
@@ -64,6 +70,7 @@ async function getGameDetails(code_name_id) {
     code_name_id,
     guesses: game.guesses,
     max_guesses: game.max_guesses,
+    has_guessed_all_clues: game.has_guessed_all_clues,
     game_code_given: '',
     clue: game.clue,
     winner: game.winner,

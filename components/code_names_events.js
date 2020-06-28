@@ -33,9 +33,9 @@ class CodeNamesEvents extends EventEmitter {
       .catch(error => { console.log("ERROR>>> ", error) })
   }
 
-  updateTurn({turn, word}) {
+  updateTurn({turn, word, has_guessed_all_clues}) {
     wretch(`${this.host_url}/projects/code_names/${this.code_name_id}/ajax`)
-      .post({turn, word})
+      .post({turn, word, has_guessed_all_clues})
       .res(response => response)
       .catch(error => { console.log("ERROR>>> ", error) })
   }

@@ -38,10 +38,8 @@ const cookieParser = require('cookie-parser');
   }
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
-  //
-  // app.use(express.static(__dirname + '/public'));
-  // console.log("__dirname + '/public'", __dirname + '/public');
   app.use(require('lasso/middleware').serveStatic());
+  app.all('/*', express.static('public'));
   app.use('/projects/code_names', express.static('public'));
   if(!development) {
     app.set('trust proxy', 1);
