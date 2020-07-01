@@ -171,12 +171,12 @@ async function update_game({
       let updateGame = `WITH code_name_update AS (
           UPDATE code_name_turns
           SET archived = NOW()
-          WHERE code_name_id = '${code_name_id}' AND archived IS NULL RETURNING code_name_team_id
+          WHERE code_name_id = '${code_name_id}' AND archived IS NULL AND guess_count IS NOT NULL RETURNING code_name_team_id, code_name_id
         ) INSERT INTO code_name_turns (code_name_id, code_name_team_id)
-        VALUES (
-          '${code_name_id}',
-          (SELECT code_name_team_id FROM code_name_team WHERE code_name_id = '${code_name_id}' AND code_name_team_id != (SELECT code_name_team_id FROM code_name_update))
-        )`;
+        SELECT code_name_id, code_name_team_id
+        FROM code_name_team
+        WHERE code_name_id = (SELECT code_name_id FROM code_name_update)
+        AND code_name_team_id != (SELECT code_name_team_id FROM code_name_update)`;
         updateGame = client.query(updateGame);
         updates.push(updateGame);
     } else if(guesses) {

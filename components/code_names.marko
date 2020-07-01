@@ -11,8 +11,8 @@ class {
       game_url: '#',
       turn: code_names.turn,
       words: code_names.words,
-      team1: code_names.team1,
-      team2: code_names.team2,
+      team_blue: code_names.team_blue,
+      team_red: code_names.team_red,
       code_name_id: code_names.code_name_id,
       guesses: code_names.max_guesses || 0,
       max_guesses: code_names.guesses || null,
@@ -43,8 +43,8 @@ class {
         this.state.rows = code_names.rows || [];
         this.state.words = code_names.words || [];
         this.state.turn = code_names.turn || '';
-        this.state.team1 = code_names.team1;
-        this.state.team2 = code_names.team2;
+        this.state.team_blue = code_names.team_blue;
+        this.state.team_red = code_names.team_red;
         this.state.guesses = code_names.guesses;
         this.state.max_guesses = code_names.max_guesses;
         this.state.has_guessed_all_clues = code_names.has_guessed_all_clues;
@@ -89,12 +89,12 @@ class {
     this.state.clue = null;
     this.state.clue_state = null;
     this.state.show_spy_master_info = false;
-    if(this.state.turn === this.state.team1.team_name) {
-      this.state.turn = this.state.team2.team_name;
-      this.state.has_guessed_all_clues = this.state.team2.has_guessed_all_clues;
+    if(this.state.turn === this.state.team_blue.team_name) {
+      this.state.turn = this.state.team_red.team_name;
+      this.state.has_guessed_all_clues = this.state.team_red.has_guessed_all_clues;
     } else {
-      this.state.turn = this.state.team1.team_name;
-      this.state.has_guessed_all_clues = this.state.team1.has_guessed_all_clues;
+      this.state.turn = this.state.team_blue.team_name;
+      this.state.has_guessed_all_clues = this.state.team_blue.has_guessed_all_clues;
     }
     this.updateTurn(word, has_guessed_all_clues);
   }
@@ -110,21 +110,21 @@ class {
     const word = this.state.words.find((element) => element.word === guessWord);
     this.state.rows[rowIndex][colIndex].is_hidden = false;
     word.hidden = false;
-    if(word.team_name === this.state.team1.team_name) {
-      this.state.team1.words = this.state.team1.words.filter((element) => element.word !== word.word);
-      tile_team_name = this.state.team1.team_name;
-    } else if(word.team_name === this.state.team2.team_name) {
-      this.state.team2.words = this.state.team2.words.filter((element) => element.word !== word.word);
-      tile_team_name = this.state.team2.team_name;
+    if(word.team_name === this.state.team_blue.team_name) {
+      this.state.team_blue.words = this.state.team_blue.words.filter((element) => element.word !== word.word);
+      tile_team_name = this.state.team_blue.team_name;
+    } else if(word.team_name === this.state.team_red.team_name) {
+      this.state.team_red.words = this.state.team_red.words.filter((element) => element.word !== word.word);
+      tile_team_name = this.state.team_red.team_name;
     } else if(word.is_death_word) {
       this.state.game_over = true;
-      winner = (this.state.turn === this.state.team1.team_name ? this.state.team2.team_name : this.state.team1.team_name);
+      winner = (this.state.turn === this.state.team_blue.team_name ? this.state.team_red.team_name : this.state.team_blue.team_name);
     }
 
-    if(this.state.team1.words.length === 0) {
-      winner = this.state.team1.team_name;
-    } else if(this.state.team2.words.length === 0) {
-      winner = this.state.team2.team_name;
+    if(this.state.team_blue.words.length === 0) {
+      winner = this.state.team_blue.team_name;
+    } else if(this.state.team_red.words.length === 0) {
+      winner = this.state.team_red.team_name;
     }
     let has_guessed_all_clues = this.state.has_guessed_all_clues;
     if(!winner && (
@@ -147,7 +147,7 @@ class {
   giveGuess(event) {
     const guess = Number(event.target.textContent);
     if(!!this.state.clue_state) {
-      const turn_team = this.state.turn === this.state.team1.team_name ? this.state.team1 : this.state.team2;
+      const turn_team = this.state.turn === this.state.team_blue.team_name ? this.state.team_blue : this.state.team_red;
       this.state.guess_text = guess;
       this.state.clue = this.state.clue_state;
       this.state.show_spy_master_info = true;
@@ -239,9 +239,9 @@ class {
         </div>
       </if>
     </div>
-    <if(state.turn && state.team1 && !state.winner)>
+    <if(state.turn && state.team_blue && !state.winner)>
       <div class="col-4">
-        <h3 class="float-left"> <span class=`badge badge-light border mr-2 py-2 border-${state.turn === 'RED' ? 'danger' : 'primary'} ${state.turn === state.team1.team_name ? state.team1.text_color : state.team2.text_color}`>${state.turn}</span></h3>
+        <h3 class="float-left"> <span class=`badge badge-light border mr-2 py-2 border-${state.turn === 'RED' ? 'danger' : 'primary'} ${state.turn === state.team_blue.team_name ? state.team_blue.text_color : state.team_red.text_color}`>${state.turn}</span></h3>
         <if(state.clue && state.guess_text && !state.spy_master && state.show_spy_master_info)>
           <button class="btn btn-nav border-primary font-weight-bold btn-sm ml-2 py-2" onClick('changeTurns')>End Turn</button>
         </if>
@@ -285,7 +285,7 @@ class {
       </div>
     </div>
   </if>
-  <if(!!state.turn && !!state.team1)>
+  <if(!!state.turn && !!state.team_blue)>
     <div class="mt-4 position-static">
       <if(!state.winner && state.turn)>
         <if(state.spy_master)>
@@ -346,9 +346,9 @@ class {
             <div class="row">
               <div class="col-1">
                 <h3>
-                  <span class=`badge mb-1 badge-light border mr-2 border-${state.team1.team_name === 'RED' ? 'danger' : 'primary'} ${state.team1.text_color}`>${state.team1.words.length}</span>
+                  <span class=`badge mb-1 badge-light border mr-2 border-${state.team_blue.team_name === 'RED' ? 'danger' : 'primary'} ${state.team_blue.text_color}`>${state.team_blue.words.length}</span>
                   <div class="progress" style="height: 3px;">
-                    <div class=`progress-bar bg-${state.team1.team_name === 'RED' ? 'danger' : 'primary'}` role="progressbar" style=`width: ${((state.team1.total_word_count - state.team1.words.length)/state.team1.total_word_count) * 100}%;` aria-valuenow=`${state.team1.total_word_count - state.team1.words.length}` aria-valuemin="0" aria-valuemax=`${state.team1.total_word_count}`></div>
+                    <div class=`progress-bar bg-${state.team_blue.team_name === 'RED' ? 'danger' : 'primary'}` role="progressbar" style=`width: ${((state.team_blue.total_word_count - state.team_blue.words.length)/state.team_blue.total_word_count) * 100}%;` aria-valuenow=`${state.team_blue.total_word_count - state.team_blue.words.length}` aria-valuemin="0" aria-valuemax=`${state.team_blue.total_word_count}`></div>
                   </div>
                 </h3>
               </div>
@@ -371,10 +371,10 @@ class {
                         <div class="input-group-append">
                           <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">For</button>
                           <div class="dropdown-menu">
-                            <for|word, wordIndex| of=(state.turn === state.team1.team_name ? state.team1.words : state.team2.words)>
+                            <for|word, wordIndex| of=(state.turn === state.team_blue.team_name ? state.team_blue.words : state.team_red.words)>
                               <div class="dropdown-item" onClick('giveGuess')>${wordIndex}</div>
                             </for>
-                            <div class="dropdown-item" onClick('giveGuess')>${(state.turn === state.team1.team_name ? state.team1.words.length : state.team2.words.length)}</div>
+                            <div class="dropdown-item" onClick('giveGuess')>${(state.turn === state.team_blue.team_name ? state.team_blue.words.length : state.team_red.words.length)}</div>
                           </div>
                         </div>
                       </div>
@@ -396,9 +396,9 @@ class {
               </div>
               <div class="col-1">
                 <h3 class="justify-content-end">
-                  <span class=`badge mb-1 badge-light border mr-2 border-${state.team2.team_name === 'RED' ? 'danger' : 'primary'} ${state.team2.text_color}`>${state.team2.words.length}</span>
+                  <span class=`badge mb-1 badge-light border mr-2 border-${state.team_red.team_name === 'RED' ? 'danger' : 'primary'} ${state.team_red.text_color}`>${state.team_red.words.length}</span>
                   <div class="progress" style="height: 3px;">
-                    <div class=`progress-bar bg-${state.team2.team_name === 'RED' ? 'danger' : 'primary'}` role="progressbar" style=`width: ${((state.team2.total_word_count-state.team2.words.length)/state.team2.total_word_count) * 100}%;` aria-valuenow=`${state.team2.total_word_count - state.team2.words.length}` aria-valuemin="0" aria-valuemax=`${state.team2.total_word_count}`></div>
+                    <div class=`progress-bar bg-${state.team_red.team_name === 'RED' ? 'danger' : 'primary'}` role="progressbar" style=`width: ${((state.team_red.total_word_count-state.team_red.words.length)/state.team_red.total_word_count) * 100}%;` aria-valuenow=`${state.team_red.total_word_count - state.team_red.words.length}` aria-valuemin="0" aria-valuemax=`${state.team_red.total_word_count}`></div>
                   </div>
                 </h3>
               </div>
@@ -441,7 +441,7 @@ class {
           <div class="row my-4 justify-content-center">
               <div class="card m-2">
                 <div class="card-header text-center">
-                  BETTER LUCK NEXT TIME TEAM ${state.team1.team_name !== state.winner ? state.team1.team_name : state.team2.team_name}...
+                  BETTER LUCK NEXT TIME TEAM ${state.team_blue.team_name !== state.winner ? state.team_blue.team_name : state.team_red.team_name}...
                 </div>
                 <div class="card-body d-flex justify-content-center">
                   <iframe src="https://giphy.com/embed/w8ltXRsJ5pv0s" width="300" height="300" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
