@@ -100,15 +100,17 @@ class {
   }
 
   handleGuessCard(guessWord, rowIndex, colIndex, event) {
-    setTimeout(this.guessCard.bind(this), 1000, guessWord, rowIndex, colIndex, event);
+    this.guessCard(guessWord, rowIndex, colIndex, event);
   }
+  //for winner: setTimeout(this.makeWinner.bind(this), 1000, guessWord, rowIndex, colIndex, event);
+
 
   guessCard(guessWord, rowIndex, colIndex, event) {
+    this.state.rows[rowIndex][colIndex].is_hidden = false;
     let winner = this.state.winner;
     this.state.guesses -= 1;
     let tile_team_name = null;
     const word = this.state.words.find((element) => element.word === guessWord);
-    this.state.rows[rowIndex][colIndex].is_hidden = false;
     word.hidden = false;
     if(word.team_name === this.state.team_blue.team_name) {
       this.state.team_blue.words = this.state.team_blue.words.filter((element) => element.word !== word.word);
