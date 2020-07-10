@@ -230,7 +230,7 @@ class {
   </div>
   <div class="header fixed-top my-2 mx-3">
     <div class="col-3">
-      <if(!state.winner)>
+      <if(!state.winner && !!state.code_name_id)>
         <div class="float-left btn-group">
           <button class=`btn btn-toggle ${state.active_toggle === 'field_operative' ? 'btn-toggle-primary font-weight-bold border-primary' : 'btn-light border-left border-top border-bottom border-secondary'}` type="button" id="field_operative" onClick("handleClick", false)>
             Operative
@@ -245,7 +245,7 @@ class {
       <div class="col-4">
         <h3 class="float-left"> <span class=`badge badge-light border mr-2 py-2 border-${state.turn === 'RED' ? 'danger' : 'primary'} ${state.turn === state.team_blue.team_name ? state.team_blue.text_color : state.team_red.text_color}`>${state.turn}</span></h3>
         <if(state.clue && state.guess_text && !state.spy_master && state.show_spy_master_info)>
-          <button class="btn btn-nav border-primary font-weight-bold btn-sm ml-2 py-2" onClick('changeTurns')>End Turn</button>
+          <button class="btn btn-nav border-primary font-weight-bold btn-sm ml-2 py-2" onClick('changeTurns', null, (state.guesses > 0 && state.has_guessed_all_clues ? false : null))>End Turn</button>
         </if>
       </div>
     </if>
@@ -258,7 +258,7 @@ class {
             />
             <div class="input-group-append">
               <if(!!state.game_code_given)>
-                <a class="btn btn-nav border-primary font-weight-bold" type="button" id="button-addon2" href=`/projects/code_names/${state.game_code_given}`>Join</a>
+                <a class="btn btn-nav border-primary font-weight-bold" type="button" id="button-addon2" href=`/projects/code_names/${state.game_code_given.toUpperCase()}`>Join</a>
               </if>
               <else>
                 <a class="btn btn-nav border-primary font-weight-bold" type="button" id="button-addon2" href='#'>Join</a>
@@ -446,7 +446,7 @@ class {
                   BETTER LUCK NEXT TIME TEAM ${state.team_blue.team_name !== state.winner ? state.team_blue.team_name : state.team_red.team_name}...
                 </div>
                 <div class="card-body d-flex justify-content-center">
-                  <iframe src="https://giphy.com/embed/w8ltXRsJ5pv0s" width="300" height="300" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+                  <iframe src="https://giphy.com/embed/d10dMmzqCYqQ0" width="300" height="300" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
                 </div>
               </div>
               <div class="card m-2">
